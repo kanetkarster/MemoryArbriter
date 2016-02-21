@@ -116,10 +116,12 @@ begin
 	end if;
 end process;
 
+-- makes sure port 1 doesn't write when port 2 is up to something
 process (clk, re1, re2, mm_wr_done, mm_rd_ready)
 begin
 	if (reset = '1') then
 		port2_busy <= NONE;
+	-- case in which port 2 is busy
 	elsif ((re2 = '1' or we2 = '1') and who = PORT_2) then
 		port2_busy <= PORT_2;
 	else
