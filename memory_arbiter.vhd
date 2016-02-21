@@ -63,7 +63,8 @@ begin
         initialize  => mm_initialize,
         dump        => '0'
       );
--- determine priority
+
+-- determine priority between ports 1 and 2
 process (clk, reset)
 begin
 	if (reset = '1') then
@@ -94,17 +95,25 @@ end process;
 process (clk, re1, re2, mm_wr_done, mm_rd_ready)
 begin
 	if ((re1 = '1' or we1 = '1') and (mm_wr_done = '0' and mm_rd_ready ='0')) then
+		-- set port 1 as busy until mm_wr_done or mm_rd_ready goes off
 		busy1 <= '1';
 	elsif (who = PORT_1) then
+		-- signal port 1 off when write or read has finished
 		busy1 <= '0';
 	end if;
 
 	if ((re2 = '1' or we2 = '1') and (mm_wr_done = '0' and mm_rd_ready ='0')) then
+		-- set port 1 as busy until mm_wr_done or mm_rd_ready goes off
 		busy2 <= '1';
 	elsif (who = PORT_2) then
+		-- signal port 2 off when write or read has finished
 		busy2 <= '0';
 	end if;
 
+	if (reset = '1') then
+		busy1 <= '0';
+		busy1 <= '0';
+	end if;
 end process;
 
 process (clk, re1, re2, mm_wr_done, mm_rd_ready)
