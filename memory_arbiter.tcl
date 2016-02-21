@@ -251,3 +251,5 @@ proc ReadMemoryWord {addr} {
   
   return $word
 }
+InitMemoryArbiter
+TestPort1Priority

@@ -40,15 +40,15 @@ architecture behavioral of memory_arbiter is
 begin
 
 	--Instantiation of the main memory component (DO NOT MODIFY)
-	main_memory : ENTITY work.Main_Memory
+      main_memory : ENTITY work.Main_Memory
       GENERIC MAP (
-				Num_Bytes_in_Word	=> NUM_BYTES_IN_WORD,
-				Num_Bits_in_Byte 	=> NUM_BITS_IN_BYTE,
+	Num_Bytes_in_Word	=> NUM_BYTES_IN_WORD,
+	Num_Bits_in_Byte 	=> NUM_BITS_IN_BYTE,
         Read_Delay        => 3, 
         Write_Delay       => 3
       )
       PORT MAP (
-        clk					=> clk,
+        clk	    => clk,
         address     => mm_address,
         Word_Byte   => '1',
         we          => mm_we,
@@ -60,4 +60,8 @@ begin
         dump        => '0'
       );
 
+process (clk, reset)
+begin
+
+end process;
 end behavioral;
