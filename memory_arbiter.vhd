@@ -37,6 +37,9 @@ architecture behavioral of memory_arbiter is
   SIGNAL mm_data          : STD_LOGIC_VECTOR(MEM_DATA_WIDTH-1 downto 0)   := (others => 'Z');
   SIGNAL mm_initialize    : STD_LOGIC                                     := '0';
 
+  SIGNAL who : STD_LOGIC := '0';
+  SIGNAL busy : STD_LOGIC := '0';
+
 begin
 
 	--Instantiation of the main memory component (DO NOT MODIFY)
@@ -66,23 +69,37 @@ begin
 	if (reset = '1') then
 		-- TODO
 	elsif (rising_edge(clk)) then
+
 		if (re1 = '1' or we1 = '1') then
 			mm_address	<= addr1;
 			mm_we		<= we1;
 			mm_re		<= re1;
 			mm_data		<= data1;
+			who		<= '1';
 		elsif (re2 = '1' or we2 = '1') then
 			mm_address	<= addr2;
 			mm_we		<= we2;
 			mm_re		<= re2;
 			mm_data		<= data2;
+			who		<= '0';
 		end if;
 	end if;
 end process;
 
--- test operation
-process (reset)
+-- determine busy
+process (clk, re1, re2, mm_wr_done, mm_rd_ready)
 begin
-	
+	if ((re1 = '1' or we1 = '1') and (mm_wr_done = '0' and mm_rd_ready ='0')) then
+		busy1 <= '1';
+	elsif (who = '1') then
+		busy1 <= '0';
+	end if;
+
+	if ((re2 = '1' or we2 = '1') and (mm_wr_done = '0' and mm_rd_ready ='0')) then
+		busy2 <= '1';
+	elsif (who = '0') then
+		busy2 <= '0';
+	end if;
+
 end process;
 end behavioral;
