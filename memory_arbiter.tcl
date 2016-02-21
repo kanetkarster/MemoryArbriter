@@ -253,3 +253,5 @@ proc ReadMemoryWord {addr} {
 }
 InitMemoryArbiter
 TestPort1Priority
+;#TestPort1StreamPriority
+;#TestPort1WaitForPort2

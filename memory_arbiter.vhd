@@ -39,7 +39,7 @@ architecture behavioral of memory_arbiter is
 
   SIGNAL who : STD_LOGIC := '0';
   SIGNAL busy : STD_LOGIC := '0';
-
+  SIGNAL port2_busy : STD_LOGIC := '0';
 begin
 
 	--Instantiation of the main memory component (DO NOT MODIFY)
@@ -62,7 +62,6 @@ begin
         initialize  => mm_initialize,
         dump        => '0'
       );
-
 -- determine priority
 process (clk, reset)
 begin
@@ -70,7 +69,7 @@ begin
 		-- TODO
 	elsif (rising_edge(clk)) then
 
-		if (re1 = '1' or we1 = '1') then
+		if (port2_busy = '0' and (re1 = '1' or we1 = '1')) then
 			mm_address	<= addr1;
 			mm_we		<= we1;
 			mm_re		<= re1;
@@ -102,4 +101,14 @@ begin
 	end if;
 
 end process;
+
+process (clk, re1, re2, mm_wr_done, mm_rd_ready)
+begin
+	if ((re2 = '1' or we2 = '1') and who = '0') then
+		port2_busy <= '1';
+	else
+		port2_busy <= '0';
+	end if;
+end process;
+
 end behavioral;
