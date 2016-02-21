@@ -60,8 +60,29 @@ begin
         dump        => '0'
       );
 
+-- determine priority
 process (clk, reset)
 begin
+	if (reset = '1') then
+		-- TODO
+	elsif (rising_edge(clk)) then
+		if (re1 = '1' or we1 = '1') then
+			mm_address	<= addr1;
+			mm_we		<= we1;
+			mm_re		<= re1;
+			mm_data		<= data1;
+		elsif (re2 = '1' or we2 = '1') then
+			mm_address	<= addr2;
+			mm_we		<= we2;
+			mm_re		<= re2;
+			mm_data		<= data2;
+		end if;
+	end if;
+end process;
 
+-- test operation
+process (reset)
+begin
+	
 end process;
 end behavioral;
