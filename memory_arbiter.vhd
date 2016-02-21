@@ -37,9 +37,10 @@ architecture behavioral of memory_arbiter is
   SIGNAL mm_data          : STD_LOGIC_VECTOR(MEM_DATA_WIDTH-1 downto 0)   := (others => 'Z');
   SIGNAL mm_initialize    : STD_LOGIC                                     := '0';
 
-  SIGNAL who : STD_LOGIC := '0';
+  type ports is (NONE, PORT_1, PORT_2);
+  SIGNAL who : ports := NONE;
   SIGNAL busy : STD_LOGIC := '0';
-  SIGNAL port2_busy : STD_LOGIC := '0';
+  SIGNAL port2_busy : ports := NONE;
 begin
 
 	--Instantiation of the main memory component (DO NOT MODIFY)
@@ -66,37 +67,41 @@ begin
 process (clk, reset)
 begin
 	if (reset = '1') then
-		-- TODO
+		-- default values
+		who <= NONE;
 	elsif (rising_edge(clk)) then
-
-		if (port2_busy = '0' and (re1 = '1' or we1 = '1')) then
+		-- give port 1 priority over port 2, but make sure we don't
+		-- interrupt an operation on port 2
+		if (port2_busy = NONE and (re1 = '1' or we1 = '1')) then
+			-- Port 1 Operation
 			mm_address	<= addr1;
 			mm_we		<= we1;
 			mm_re		<= re1;
 			mm_data		<= data1;
-			who		<= '1';
+			who		<= PORT_1;
 		elsif (re2 = '1' or we2 = '1') then
+			-- Port 2 Operation
 			mm_address	<= addr2;
 			mm_we		<= we2;
 			mm_re		<= re2;
 			mm_data		<= data2;
-			who		<= '0';
+			who		<= PORT_2;
 		end if;
 	end if;
 end process;
 
--- determine busy
+-- determine whether PORT 1 or PORT_2 is busy 
 process (clk, re1, re2, mm_wr_done, mm_rd_ready)
 begin
 	if ((re1 = '1' or we1 = '1') and (mm_wr_done = '0' and mm_rd_ready ='0')) then
 		busy1 <= '1';
-	elsif (who = '1') then
+	elsif (who = PORT_1) then
 		busy1 <= '0';
 	end if;
 
 	if ((re2 = '1' or we2 = '1') and (mm_wr_done = '0' and mm_rd_ready ='0')) then
 		busy2 <= '1';
-	elsif (who = '0') then
+	elsif (who = PORT_2) then
 		busy2 <= '0';
 	end if;
 
@@ -104,10 +109,12 @@ end process;
 
 process (clk, re1, re2, mm_wr_done, mm_rd_ready)
 begin
-	if ((re2 = '1' or we2 = '1') and who = '0') then
-		port2_busy <= '1';
+	if (reset = '1') then
+		port2_busy <= NONE;
+	elsif ((re2 = '1' or we2 = '1') and who = PORT_2) then
+		port2_busy <= PORT_2;
 	else
-		port2_busy <= '0';
+		port2_busy <= NONE;
 	end if;
 end process;
 
